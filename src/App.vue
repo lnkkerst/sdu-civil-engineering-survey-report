@@ -42,7 +42,7 @@ function toggleLeftDrawer() {
 
         <q-toolbar-title> 工程测量实验 </q-toolbar-title>
 
-        <q-btn flat round dense>
+        <q-btn flat round dense mx="1">
           <i i-mdi-theme-light-dark text-xl />
           <q-menu>
             <q-list>
@@ -74,6 +74,14 @@ function toggleLeftDrawer() {
             </q-list>
           </q-menu>
         </q-btn>
+        <a
+          href="https://github.com/lnkkerst/sdu-civil-engineering-survey-report"
+          target="_blank"
+        >
+          <q-btn flat round dense>
+            <i i-mdi-github text-xl />
+          </q-btn>
+        </a>
       </q-toolbar>
     </q-header>
 
