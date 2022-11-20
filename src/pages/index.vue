@@ -2,7 +2,7 @@
 
 <template>
   <p>Nothing here :)</p>
-  <div>See <q-icon name="menu"></q-icon></div>
+  <div>See <q-icon name="menu" /></div>
 </template>
 
 <style scoped></style>

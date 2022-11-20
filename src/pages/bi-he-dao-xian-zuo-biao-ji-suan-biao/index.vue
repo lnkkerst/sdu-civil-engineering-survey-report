@@ -1,169 +1,180 @@
 <script setup lang="ts">
-import Dms from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Dms';
-import Point from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Point';
-import { dms2Number } from '~/utils/convert';
-import { prettifyDms } from '~/utils/format';
+import { v4 as uuid } from 'uuid'
+import type Dms from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Dms'
+import type Point from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Point'
+import { dms2Number } from '~/utils/convert'
+import { prettifyDms } from '~/utils/format'
 
-const table = ref();
+const table = ref()
 const points = useStorage<Point[]>(
   'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-points',
   [],
-  localStorage
-);
+  localStorage,
+)
 
 const zhuanZheJiaoSum = computed(() => {
-  if (!points.value.length) {
-    return 0;
-  }
+  if (!points.value.length)
+    return 0
+
   return points.value
     .map(el => dms2Number(el.angle))
-    .reduce((prev, cur) => prev + cur);
-});
+    .reduce((prev, cur) => prev + cur)
+})
+
+const distance = useStorage<number[]>(
+  'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-distance',
+  [],
+  localStorage,
+)
+
+const distanceSum = computed(() => {
+  if (!distance.value.length)
+    return 0
+
+  return distance.value.reduce((x, y) => x + y)
+})
 
 const gaiZhengShu = computed(() => {
-  let remain = 360 - zhuanZheJiaoSum.value;
-  return distance.value.map(val => (remain * val) / distanceSum.value);
-});
+  const remain = 360 - zhuanZheJiaoSum.value
+  return distance.value.map(val => (remain * val) / distanceSum.value)
+})
 
 const gaiZhengHouZhuanJiao = computed(() => {
   return points.value.map((point, index) => {
-    return dms2Number(point.angle) + gaiZhengShu.value[index];
-  });
-});
+    return dms2Number(point.angle) + gaiZhengShu.value[index]
+  })
+})
 
 const initDirectionAngle = useStorage<Dms>(
   'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-init-direction-angle',
   {
     degree: 30,
     minute: 0,
-    second: 0
+    second: 0,
   },
-  localStorage
-);
+  localStorage,
+)
 
 const initZuoBiao = useStorage<{ x: number; y: number }>(
   'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-init-zuobiao',
   {
     x: 300000,
-    y: 300000
+    y: 300000,
   },
-  localStorage
-);
+  localStorage,
+)
 
 const directionAngle = computed(() => {
-  let res: number[] = [dms2Number(initDirectionAngle.value)];
+  const res: number[] = [dms2Number(initDirectionAngle.value)]
   for (let i = 0; i < points.value.length; ++i) {
     res.push(
-      res[i] - gaiZhengHouZhuanJiao.value[(i + 1) % points.value.length] + 180
-    );
+      res[i] - gaiZhengHouZhuanJiao.value[(i + 1) % points.value.length] + 180,
+    )
   }
-  return res;
-});
-
-const zuoBiao = computed(() => {
-  let res = [initZuoBiao.value];
-  for (let i = 0; i < gaiZhengHouZuoBiaoZengLiang.value.length; ++i) {
-    res.push({
-      x: res[i].x + gaiZhengHouZuoBiaoZengLiang.value[i].x,
-      y: res[i].y + gaiZhengHouZuoBiaoZengLiang.value[i].y
-    });
-  }
-  return res;
-});
-
-const distance = useStorage<number[]>(
-  'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-distance',
-  [],
-  localStorage
-);
+  return res
+})
 
 const zuoBiaoZengLiang = computed(() => {
   return distance.value.map((val, index) => ({
     x: val * Math.sin((directionAngle.value[index] * Math.PI) / 180),
-    y: val * Math.cos((directionAngle.value[index] * Math.PI) / 180)
-  }));
-});
-
-const gaiZhengHouZuoBiaoZengLiang = computed(() => {
-  return distance.value.map((val, index) => ({
-    x:
-      zuoBiaoZengLiang.value[index].x +
-      (zuoBiaoZengLiangSum.value.x * val) / distanceSum.value,
-    y:
-      zuoBiaoZengLiang.value[index].y +
-      (zuoBiaoZengLiangSum.value.y / val) * distanceSum.value
-  }));
-});
-
-const distanceSum = computed(() => {
-  if (!distance.value.length) {
-    return 0;
-  }
-  return distance.value.reduce((x, y) => x + y);
-});
+    y: val * Math.cos((directionAngle.value[index] * Math.PI) / 180),
+  }))
+})
 
 const zuoBiaoZengLiangSum = computed(() => {
   if (zuoBiaoZengLiang.value.length) {
     return zuoBiaoZengLiang.value.reduce((prev, cur) => ({
       x: prev.x + cur.x,
-      y: prev.y + cur.y
-    }));
-  } else {
-    return { x: 0, y: 0 };
+      y: prev.y + cur.y,
+    }))
   }
-});
+  else {
+    return { x: 0, y: 0 }
+  }
+})
+
+const gaiZhengHouZuoBiaoZengLiang = computed(() => {
+  return distance.value.map((val, index) => ({
+    x:
+      zuoBiaoZengLiang.value[index].x
+      + (zuoBiaoZengLiangSum.value.x * val) / distanceSum.value,
+    y:
+      zuoBiaoZengLiang.value[index].y
+      + (zuoBiaoZengLiangSum.value.y / val) * distanceSum.value,
+  }))
+})
+
+const zuoBiao = computed(() => {
+  const res = [initZuoBiao.value]
+  for (let i = 0; i < gaiZhengHouZuoBiaoZengLiang.value.length; ++i) {
+    res.push({
+      x: res[i].x + gaiZhengHouZuoBiaoZengLiang.value[i].x,
+      y: res[i].y + gaiZhengHouZuoBiaoZengLiang.value[i].y,
+    })
+  }
+  return res
+})
 
 function handleAdd() {
   points.value.push({
+    uuid: uuid(),
     id: '',
     angle: {
       degree: Math.random() * 360,
       minute: Math.random() * 60,
-      second: Math.random() * 60
-    }
-  });
-  distance.value.push(Math.random() * 10);
+      second: Math.random() * 60,
+    },
+  })
+  distance.value.push(Math.random() * 10)
 }
 
 function handleDelete(index: number) {
-  points.value.splice(index, 1);
-  distance.value.splice(index, 1);
+  points.value.splice(index, 1)
+  distance.value.splice(index, 1)
 }
 
 onMounted(() => {
   table.value.querySelectorAll('tr').forEach((el: HTMLTableRowElement) => {
-    el.classList.add('q-tr--no-hover');
-  });
+    el.classList.add('q-tr--no-hover')
+  })
   table.value.querySelectorAll('td').forEach((el: HTMLElement) => {
-    el.classList.add('q-td--no-hover');
-  });
-});
+    el.classList.add('q-td--no-hover')
+  })
+})
 </script>
 
 <template>
   <q-card overflow-x-auto>
-    <div relative ref="table">
+    <div ref="table" relative>
       <q-markup-table separator="cell">
         <thead>
           <tr>
             <th
-              rowspan="2"
               v-for="th in [
                 '点号',
                 '转折角',
                 '改正数',
                 '改正后转折角',
                 '方位角α',
-                '边长'
+                '边长',
               ]"
               :key="th"
+              rowspan="2"
             >
               {{ th }}
             </th>
-            <th colspan="2">坐标增量</th>
-            <th colspan="2">改正后坐标增量</th>
-            <th colspan="2">坐标</th>
-            <th rowspan="2">操作</th>
+            <th colspan="2">
+              坐标增量
+            </th>
+            <th colspan="2">
+              改正后坐标增量
+            </th>
+            <th colspan="2">
+              坐标
+            </th>
+            <th rowspan="2">
+              操作
+            </th>
           </tr>
           <tr>
             <th>Δx</th>
@@ -175,10 +186,10 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <template v-for="(point, index) in points">
+          <template v-for="(point, index) in points" :key="point.uuid">
             <tr h-10>
               <td rowspan="2" w="32">
-                <q-input outlined dense v-model="point.id"></q-input>
+                <q-input v-model="point.id" outlined dense />
               </td>
               <td rowspan="2" w="72">
                 <div inline-block w="18">
@@ -188,10 +199,10 @@ onMounted(() => {
                     :model-value="point.angle.degree"
                     @update:model-value="
                       (newValue:string) => {
-                        point.angle.degree = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        point.angle.degree = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 °
                 <div inline-block w="14">
@@ -201,10 +212,10 @@ onMounted(() => {
                     :model-value="point.angle.minute"
                     @update:model-value="
                       (newValue:string) => {
-                        point.angle.minute = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        point.angle.minute = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 ′
                 <div inline-block w="14">
@@ -214,10 +225,10 @@ onMounted(() => {
                     :model-value="point.angle.second"
                     @update:model-value="
                       (newValue:string) => {
-                        point.angle.second = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        point.angle.second = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 ″
               </td>
@@ -227,7 +238,9 @@ onMounted(() => {
               <td rowspan="2">
                 {{ prettifyDms(gaiZhengHouZhuanJiao[index]) }}
               </td>
-              <td v-if="index === 0" v-for="_ in 6"></td>
+              <template v-if="index === 0">
+                <td v-for="_ in 6" :key="_" />
+              </template>
               <template v-if="index === 0">
                 <td rowspan="2" w="54">
                   <q-input
@@ -236,10 +249,10 @@ onMounted(() => {
                     :model-value="initZuoBiao.x"
                     @update:model-value="
                       (newValue:string) => {
-                        initZuoBiao.x = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        initZuoBiao.x = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </td>
                 <td rowspan="2" w="54">
                   <q-input
@@ -248,15 +261,19 @@ onMounted(() => {
                     :model-value="initZuoBiao.y"
                     @update:model-value="
                       (newValue:string) => {
-                        initZuoBiao.y = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        initZuoBiao.y = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </td>
               </template>
               <template v-else>
-                <td rowspan="2">{{ zuoBiao[index].x.toFixed(5) }}</td>
-                <td rowspan="2">{{ zuoBiao[index].y.toFixed(5) }}</td>
+                <td rowspan="2">
+                  {{ zuoBiao[index].x.toFixed(5) }}
+                </td>
+                <td rowspan="2">
+                  {{ zuoBiao[index].y.toFixed(5) }}
+                </td>
               </template>
               <td rowspan="2">
                 <q-btn
@@ -264,12 +281,11 @@ onMounted(() => {
                   color="negative"
                   round
                   @click="() => handleDelete(index)"
-                >
-                </q-btn>
+                />
               </td>
             </tr>
             <tr h-10>
-              <td rowspan="2" v-if="index === 0" w="72">
+              <td v-if="index === 0" rowspan="2" w="72">
                 <div inline-block w="18">
                   <q-input
                     outlined
@@ -277,10 +293,10 @@ onMounted(() => {
                     :model-value="initDirectionAngle.degree"
                     @update:model-value="
                       (newValue:string) => {
-                        initDirectionAngle.degree = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        initDirectionAngle.degree = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 °
                 <div inline-block w="14">
@@ -290,10 +306,10 @@ onMounted(() => {
                     :model-value="initDirectionAngle.minute"
                     @update:model-value="
                       (newValue:string) => {
-                        initDirectionAngle.minute = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        initDirectionAngle.minute = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 ′
                 <div inline-block w="14">
@@ -303,14 +319,14 @@ onMounted(() => {
                     :model-value="initDirectionAngle.second"
                     @update:model-value="
                       (newValue:string) => {
-                        initDirectionAngle.second = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                        initDirectionAngle.second = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                       }
                     "
-                  ></q-input>
+                  />
                 </div>
                 ″
               </td>
-              <td rowspan="2" v-else>
+              <td v-else rowspan="2">
                 {{ prettifyDms(directionAngle[index]) }}
               </td>
               <td rowspan="2" w="32">
@@ -320,13 +336,17 @@ onMounted(() => {
                   :model-value="distance[index]"
                   @update:model-value="
                     (newValue:string) => {
-                      distance[index] = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      distance[index] = isNaN(parseFloat(newValue)) ? 0 : parseFloat(newValue);
                     }
                   "
-                ></q-input>
+                />
               </td>
-              <td rowspan="2">{{ zuoBiaoZengLiang[index].x.toFixed(5) }}</td>
-              <td rowspan="2">{{ zuoBiaoZengLiang[index].y.toFixed(5) }}</td>
+              <td rowspan="2">
+                {{ zuoBiaoZengLiang[index].x.toFixed(5) }}
+              </td>
+              <td rowspan="2">
+                {{ zuoBiaoZengLiang[index].y.toFixed(5) }}
+              </td>
               <td rowspan="2">
                 {{ gaiZhengHouZuoBiaoZengLiang[index].x.toFixed(5) }}
               </td>
@@ -337,12 +357,11 @@ onMounted(() => {
           </template>
           <tr h-10>
             <td rowspan="2">
-              <q-btn round color="primary" @click="handleAdd" icon="add">
-              </q-btn>
+              <q-btn round color="primary" icon="add" @click="handleAdd" />
             </td>
-            <td rowspan="2" v-for="_ in 3"></td>
+            <td v-for="_ in 3" :key="_" rowspan="2" />
           </tr>
-          <tr h-10></tr>
+          <tr h-10 />
           <tr h-10>
             <td rowspan="1">
               <span text-lg font-bold>Σ</span>
@@ -352,7 +371,7 @@ onMounted(() => {
               {{ prettifyDms(360 - zhuanZheJiaoSum) }}
             </td>
             <td>{{ prettifyDms(360) }}</td>
-            <td></td>
+            <td />
             <td>{{ distanceSum.toFixed(5) }}</td>
             <td>{{ zuoBiaoZengLiangSum.x.toFixed(5) }}</td>
             <td>{{ zuoBiaoZengLiangSum.y.toFixed(5) }}</td>
@@ -362,8 +381,8 @@ onMounted(() => {
               fD =
               {{
                 Math.sqrt(
-                  Math.pow(zuoBiaoZengLiangSum.x, 2) +
-                    Math.pow(zuoBiaoZengLiangSum.y, 2)
+                  Math.pow(zuoBiaoZengLiangSum.x, 2)
+                    + Math.pow(zuoBiaoZengLiangSum.y, 2),
                 ) / distanceSum
               }}
             </td>

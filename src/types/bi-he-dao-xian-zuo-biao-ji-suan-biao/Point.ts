@@ -1,4 +1,7 @@
+import type Dms from './Dms'
+
 export default interface Point {
-  id: string;
-  angle: Dms;
+  uuid: string
+  id: string
+  angle: Dms
 }

@@ -1,32 +1,32 @@
 /// <reference types="vitest" />
 
-import path from 'path';
-import { defineConfig } from 'vite';
-import Vue from '@vitejs/plugin-vue';
-import vueJsx from '@vitejs/plugin-vue-jsx';
-import Pages from 'vite-plugin-pages';
-import Components from 'unplugin-vue-components/vite';
-import AutoImport from 'unplugin-auto-import/vite';
+import path from 'path'
+import { defineConfig } from 'vite'
+import Vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
+import Pages from 'vite-plugin-pages'
+import Components from 'unplugin-vue-components/vite'
+import AutoImport from 'unplugin-auto-import/vite'
 import {
-  Vuetify3Resolver,
-  NaiveUiResolver,
   ElementPlusResolver,
-  QuasarResolver
-} from 'unplugin-vue-components/resolvers';
-import Unocss from 'unocss/vite';
-import vuetify from 'vite-plugin-vuetify';
-import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
+  NaiveUiResolver,
+  QuasarResolver,
+  Vuetify3Resolver,
+} from 'unplugin-vue-components/resolvers'
+import Unocss from 'unocss/vite'
+import vuetify from 'vite-plugin-vuetify'
+import { quasar, transformAssetUrls } from '@quasar/vite-plugin'
 
 export default defineConfig({
   resolve: {
     alias: {
-      '~/': `${path.resolve(__dirname, 'src')}/`
-    }
+      '~/': `${path.resolve(__dirname, 'src')}/`,
+    },
   },
   plugins: [
     Vue({
       reactivityTransform: true,
-      template: { transformAssetUrls }
+      template: { transformAssetUrls },
     }),
 
     // https://github.com/hannoeru/vite-plugin-pages
@@ -37,7 +37,7 @@ export default defineConfig({
       imports: ['vue', 'vue/macros', 'vue-router', '@vueuse/core'],
       dts: true,
       dirs: ['./src/composables'],
-      vueTemplate: true
+      vueTemplate: true,
     }),
 
     // https://github.com/antfu/vite-plugin-components
@@ -47,8 +47,8 @@ export default defineConfig({
         Vuetify3Resolver(),
         NaiveUiResolver(),
         ElementPlusResolver(),
-        QuasarResolver()
-      ]
+        QuasarResolver(),
+      ],
     }),
 
     // https://github.com/antfu/unocss
@@ -60,12 +60,12 @@ export default defineConfig({
     vuetify({ autoImport: false }),
 
     quasar({
-      sassVariables: 'src/quasar-variables.sass'
-    })
+      sassVariables: 'src/quasar-variables.sass',
+    }),
   ],
 
   // https://github.com/vitest-dev/vitest
   test: {
-    environment: 'jsdom'
-  }
-});
+    environment: 'jsdom',
+  },
+})
