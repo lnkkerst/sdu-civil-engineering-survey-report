@@ -7,12 +7,19 @@ export {};
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    Counter: typeof import('./src/components/Counter.vue')['default'];
-    DemoCanvas: typeof import('./src/components/DemoCanvas.vue')['default'];
-    ElInput: typeof import('element-plus/es')['ElInput'];
-    Footer: typeof import('./src/components/Footer.vue')['default'];
+    InputNumber: typeof import('./src/components/InputNumber.vue')['default'];
     NInput: typeof import('naive-ui')['NInput'];
     NInputNumber: typeof import('naive-ui')['NInputNumber'];
+    NTable: typeof import('naive-ui')['NTable'];
+    NumberInput: typeof import('./src/components/NumberInput.vue')['default'];
+    QAvatar: typeof import('quasar')['QAvatar'];
+    QBtn: typeof import('quasar')['QBtn'];
+    QDrawer: typeof import('quasar')['QDrawer'];
+    QHeader: typeof import('quasar')['QHeader'];
+    QLayout: typeof import('quasar')['QLayout'];
+    QPageContainer: typeof import('quasar')['QPageContainer'];
+    QToolbar: typeof import('quasar')['QToolbar'];
+    QToolbarTitle: typeof import('quasar')['QToolbarTitle'];
     RouterLink: typeof import('vue-router')['RouterLink'];
     RouterView: typeof import('vue-router')['RouterView'];
     Starport: typeof import('vue-starport')['Starport'];
@@ -22,10 +29,8 @@ declare module '@vue/runtime-core' {
     VAppBarNavIcon: typeof import('vuetify/components')['VAppBarNavIcon'];
     VBtn: typeof import('vuetify/components')['VBtn'];
     VCard: typeof import('vuetify/components')['VCard'];
-    VInput: typeof import('vuetify/components')['VInput'];
     VMain: typeof import('vuetify/components')['VMain'];
     VNavigationDrawer: typeof import('vuetify/components')['VNavigationDrawer'];
-    VTable: typeof import('vuetify/components')['VTable'];
     VTextField: typeof import('vuetify/components')['VTextField'];
     VToolbarTitle: typeof import('vuetify/components')['VToolbarTitle'];
   }

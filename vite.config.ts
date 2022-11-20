@@ -10,10 +10,12 @@ import AutoImport from 'unplugin-auto-import/vite';
 import {
   Vuetify3Resolver,
   NaiveUiResolver,
-  ElementPlusResolver
+  ElementPlusResolver,
+  QuasarResolver
 } from 'unplugin-vue-components/resolvers';
 import Unocss from 'unocss/vite';
 import vuetify from 'vite-plugin-vuetify';
+import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 
 export default defineConfig({
   resolve: {
@@ -23,7 +25,8 @@ export default defineConfig({
   },
   plugins: [
     Vue({
-      reactivityTransform: true
+      reactivityTransform: true,
+      template: { transformAssetUrls }
     }),
 
     // https://github.com/hannoeru/vite-plugin-pages
@@ -40,7 +43,12 @@ export default defineConfig({
     // https://github.com/antfu/vite-plugin-components
     Components({
       dts: true,
-      resolvers: [Vuetify3Resolver(), NaiveUiResolver(), ElementPlusResolver()]
+      resolvers: [
+        Vuetify3Resolver(),
+        NaiveUiResolver(),
+        ElementPlusResolver(),
+        QuasarResolver()
+      ]
     }),
 
     // https://github.com/antfu/unocss
@@ -49,7 +57,11 @@ export default defineConfig({
 
     vueJsx(),
 
-    vuetify({ autoImport: false })
+    vuetify({ autoImport: false }),
+
+    quasar({
+      sassVariables: 'src/quasar-variables.sass'
+    })
   ],
 
   // https://github.com/vitest-dev/vitest

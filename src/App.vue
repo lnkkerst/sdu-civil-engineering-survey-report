@@ -1,22 +1,69 @@
 <script setup lang="ts">
-let drawer = $ref(false);
+const leftDrawerOpen = useStorage(
+  'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-left-drawer',
+  false,
+  localStorage
+);
+
+const menuList = [
+  {
+    label: '闭合导线坐标计算表',
+    route: '/bi-he-dao-xian-zuo-biao-ji-suan-biao'
+  }
+];
+
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
 </script>
 <template>
-  <v-app>
-    <v-navigation-drawer v-model="drawer"> </v-navigation-drawer>
+  <q-layout view="hHh LpR lFr">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar>
+        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
 
-    <v-app-bar>
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <q-toolbar-title> 工程测量实验 </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
 
-      <v-toolbar-title>Application</v-toolbar-title>
-    </v-app-bar>
+    <q-drawer v-model="leftDrawerOpen" side="left" bordered>
+      <q-list padding>
+        <q-item
+          clickable
+          v-ripple
+          :active="$route.path === '/'"
+          @click="$router.push('/')"
+        >
+          <q-item-section avatar>
+            <q-icon name="home" />
+          </q-item-section>
 
-    <v-main>
-      <div relative px="sm" pt="xl">
-        <router-view></router-view>
+          <q-item-section> 主页 </q-item-section>
+        </q-item>
+
+        <q-separator></q-separator>
+
+        <q-item
+          v-for="item in menuList"
+          clickable
+          v-ripple
+          :active="$route.path === item.route"
+          @click="$router.push(item.route)"
+          :key="item.label"
+        >
+          <q-item-section>
+            {{ item.label }}
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <q-page-container>
+      <div relative my="6" px="4">
+        <router-view />
       </div>
-    </v-main>
-  </v-app>
+    </q-page-container>
+  </q-layout>
 </template>
 
 <style scoped></style>

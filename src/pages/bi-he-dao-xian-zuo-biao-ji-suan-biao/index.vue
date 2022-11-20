@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { NTable } from 'naive-ui';
+import Dms from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Dms';
 import Point from '~/types/bi-he-dao-xian-zuo-biao-ji-suan-biao/Point';
 import { dms2Number } from '~/utils/convert';
 import { prettifyDms } from '~/utils/format';
 
+const table = ref();
 const points = useStorage<Point[]>(
   'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-points',
   [],
@@ -30,16 +31,24 @@ const gaiZhengHouZhuanJiao = computed(() => {
   });
 });
 
-const initDirectionAngle = ref<Dms>({
-  degree: 30,
-  minute: 0,
-  second: 0
-});
+const initDirectionAngle = useStorage<Dms>(
+  'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-init-direction-angle',
+  {
+    degree: 30,
+    minute: 0,
+    second: 0
+  },
+  localStorage
+);
 
-const initZuoBiao = ref({
-  x: 300000,
-  y: 300000
-});
+const initZuoBiao = useStorage<{ x: number; y: number }>(
+  'sdu-gccl-bi-he-dao-xian-zuo-biao-ji-suan-biao-init-zuobiao',
+  {
+    x: 300000,
+    y: 300000
+  },
+  localStorage
+);
 
 const directionAngle = computed(() => {
   let res: number[] = [dms2Number(initDirectionAngle.value)];
@@ -120,177 +129,249 @@ function handleDelete(index: number) {
   points.value.splice(index, 1);
   distance.value.splice(index, 1);
 }
+
+onMounted(() => {
+  table.value.querySelectorAll('tr').forEach((el: HTMLTableRowElement) => {
+    el.classList.add('q-tr--no-hover');
+  });
+  table.value.querySelectorAll('td').forEach((el: HTMLElement) => {
+    el.classList.add('q-td--no-hover');
+  });
+});
 </script>
 
 <template>
-  <v-card overflow-auto>
-    <NTable p="sm" min-w="1280px" :single-line="false">
-      <thead>
-        <tr>
-          <th
-            rowspan="2"
-            v-for="th in [
-              '点号',
-              '转折角',
-              '改正数',
-              '改正后转折角',
-              '方位角α',
-              '边长'
-            ]"
-            :key="th"
-          >
-            {{ th }}
-          </th>
-          <th colspan="2">坐标增量</th>
-          <th colspan="2">改正后坐标增量</th>
-          <th colspan="2">坐标</th>
-          <th rowspan="2">操作</th>
-        </tr>
-        <tr>
-          <th>Δx</th>
-          <th>Δy</th>
-          <th>Δx</th>
-          <th>Δy</th>
-          <th>x</th>
-          <th>y</th>
-        </tr>
-      </thead>
-      <tbody>
-        <template v-for="(point, index) in points" :key="point.id">
+  <q-card overflow-x-auto>
+    <div relative ref="table">
+      <q-markup-table separator="cell">
+        <thead>
+          <tr>
+            <th
+              rowspan="2"
+              v-for="th in [
+                '点号',
+                '转折角',
+                '改正数',
+                '改正后转折角',
+                '方位角α',
+                '边长'
+              ]"
+              :key="th"
+            >
+              {{ th }}
+            </th>
+            <th colspan="2">坐标增量</th>
+            <th colspan="2">改正后坐标增量</th>
+            <th colspan="2">坐标</th>
+            <th rowspan="2">操作</th>
+          </tr>
+          <tr>
+            <th>Δx</th>
+            <th>Δy</th>
+            <th>Δx</th>
+            <th>Δy</th>
+            <th>x</th>
+            <th>y</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="(point, index) in points">
+            <tr h-10>
+              <td rowspan="2" w="32">
+                <q-input outlined dense v-model="point.id"></q-input>
+              </td>
+              <td rowspan="2" w="72">
+                <div inline-block w="18">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="point.angle.degree"
+                    @update:model-value="
+                      (newValue:string) => {
+                        point.angle.degree = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                °
+                <div inline-block w="14">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="point.angle.minute"
+                    @update:model-value="
+                      (newValue:string) => {
+                        point.angle.minute = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                ′
+                <div inline-block w="14">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="point.angle.second"
+                    @update:model-value="
+                      (newValue:string) => {
+                        point.angle.second = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                ″
+              </td>
+              <td rowspan="2">
+                {{ prettifyDms(gaiZhengShu[index]) }}
+              </td>
+              <td rowspan="2">
+                {{ prettifyDms(gaiZhengHouZhuanJiao[index]) }}
+              </td>
+              <td v-if="index === 0" v-for="_ in 6"></td>
+              <template v-if="index === 0">
+                <td rowspan="2" w="54">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="initZuoBiao.x"
+                    @update:model-value="
+                      (newValue:string) => {
+                        initZuoBiao.x = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </td>
+                <td rowspan="2" w="54">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="initZuoBiao.y"
+                    @update:model-value="
+                      (newValue:string) => {
+                        initZuoBiao.y = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </td>
+              </template>
+              <template v-else>
+                <td rowspan="2">{{ zuoBiao[index].x.toFixed(4) }}</td>
+                <td rowspan="2">{{ zuoBiao[index].y.toFixed(4) }}</td>
+              </template>
+              <td rowspan="2">
+                <q-btn
+                  icon="delete"
+                  color="negative"
+                  round
+                  @click="() => handleDelete(index)"
+                >
+                </q-btn>
+              </td>
+            </tr>
+            <tr h-10>
+              <td rowspan="2" v-if="index === 0" w="72">
+                <div inline-block w="18">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="initDirectionAngle.degree"
+                    @update:model-value="
+                      (newValue:string) => {
+                        initDirectionAngle.degree = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                °
+                <div inline-block w="14">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="initDirectionAngle.minute"
+                    @update:model-value="
+                      (newValue:string) => {
+                        initDirectionAngle.minute = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                ′
+                <div inline-block w="14">
+                  <q-input
+                    outlined
+                    dense
+                    :model-value="initDirectionAngle.second"
+                    @update:model-value="
+                      (newValue:string) => {
+                        initDirectionAngle.second = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                      }
+                    "
+                  ></q-input>
+                </div>
+                ″
+              </td>
+              <td rowspan="2" v-else>
+                {{ prettifyDms(directionAngle[index]) }}
+              </td>
+              <td rowspan="2" w="32">
+                <q-input
+                  outlined
+                  dense
+                  :model-value="distance[index]"
+                  @update:model-value="
+                    (newValue:string) => {
+                      distance[index] = isNaN(parseFloat(newValue))? 0 : parseFloat(newValue);
+                    }
+                  "
+                ></q-input>
+              </td>
+              <td rowspan="2">{{ zuoBiaoZengLiang[index].x.toFixed(4) }}</td>
+              <td rowspan="2">{{ zuoBiaoZengLiang[index].y.toFixed(4) }}</td>
+              <td rowspan="2">
+                {{ gaiZhengHouZuoBiaoZengLiang[index].x.toFixed(4) }}
+              </td>
+              <td rowspan="2">
+                {{ gaiZhengHouZuoBiaoZengLiang[index].y.toFixed(4) }}
+              </td>
+            </tr>
+          </template>
           <tr h-10>
-            <td rowspan="2" w="32">
-              <n-input v-model:value="point.id"></n-input>
-            </td>
-            <td rowspan="2" w="72">
-              <div inline-block w="18">
-                <n-input-number
-                  v-model:value="point.angle.degree"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              °
-              <div inline-block w="14">
-                <n-input-number
-                  v-model:value="point.angle.minute"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              ′
-              <div inline-block w="14">
-                <n-input-number
-                  v-model:value="point.angle.second"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              ″
-            </td>
             <td rowspan="2">
-              {{ prettifyDms(gaiZhengShu[index]) }}
+              <q-btn round color="primary" @click="handleAdd" icon="add">
+              </q-btn>
             </td>
-            <td rowspan="2">
-              {{ prettifyDms(gaiZhengHouZhuanJiao[index]) }}
+            <td rowspan="2" v-for="_ in 3"></td>
+          </tr>
+          <tr h-10></tr>
+          <tr h-10>
+            <td rowspan="1">
+              <span text-lg font-bold>Σ</span>
             </td>
-            <td v-if="index === 0" v-for="_ in 6"></td>
-            <template v-if="index === 0">
-              <td rowspan="2" w="54">
-                <n-input-number
-                  :show-button="false"
-                  v-model:value="initZuoBiao.x"
-                ></n-input-number>
-              </td>
-              <td rowspan="2" w="54">
-                <n-input-number
-                  :show-button="false"
-                  v-model:value="initZuoBiao.y"
-                ></n-input-number>
-              </td>
-            </template>
-            <template v-else>
-              <td rowspan="2">{{ zuoBiao[index].x.toFixed(4) }}</td>
-              <td rowspan="2">{{ zuoBiao[index].y.toFixed(4) }}</td>
-            </template>
-            <td rowspan="2">
-              <v-btn icon color="error" @click="() => handleDelete(index)">
-                <i i-mdi-delete text-xl></i>
-              </v-btn>
+            <td>{{ prettifyDms(zhuanZheJiaoSum) }}</td>
+            <td>
+              {{ prettifyDms(360 - zhuanZheJiaoSum) }}
             </td>
+            <td>{{ prettifyDms(360) }}</td>
+            <td></td>
+            <td>{{ distanceSum.toFixed(4) }}</td>
+            <td>{{ zuoBiaoZengLiangSum.x.toFixed(4) }}</td>
+            <td>{{ zuoBiaoZengLiangSum.y.toFixed(4) }}</td>
           </tr>
           <tr h-10>
-            <td rowspan="2" v-if="index === 0" w="72">
-              <div inline-block w="18">
-                <n-input-number
-                  v-model:value="initDirectionAngle.degree"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              °
-              <div inline-block w="14">
-                <n-input-number
-                  v-model:value="initDirectionAngle.minute"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              ′
-              <div inline-block w="14">
-                <n-input-number
-                  v-model:value="initDirectionAngle.second"
-                  :show-button="false"
-                ></n-input-number>
-              </div>
-              ″
-            </td>
-            <td rowspan="2" v-else>{{ prettifyDms(directionAngle[index]) }}</td>
-            <td rowspan="2" w="32">
-              <n-input-number
-                v-model:value="distance[index]"
-                :show-button="false"
-              ></n-input-number>
-            </td>
-            <td rowspan="2">{{ zuoBiaoZengLiang[index].x.toFixed(4) }}</td>
-            <td rowspan="2">{{ zuoBiaoZengLiang[index].y.toFixed(4) }}</td>
-            <td rowspan="2">
-              {{ gaiZhengHouZuoBiaoZengLiang[index].x.toFixed(4) }}
-            </td>
-            <td rowspan="2">
-              {{ gaiZhengHouZuoBiaoZengLiang[index].y.toFixed(4) }}
+            <td colspan="13">
+              fD =
+              {{
+                Math.sqrt(
+                  Math.pow(zuoBiaoZengLiangSum.x, 2) +
+                    Math.pow(zuoBiaoZengLiangSum.y, 2)
+                ) / distanceSum
+              }}
             </td>
           </tr>
-        </template>
-        <tr h-10>
-          <td rowspan="2">
-            <v-btn icon color="primary" @click="handleAdd">
-              <i i-mdi-plus text-xl></i>
-            </v-btn>
-          </td>
-          <td rowspan="2" v-for="_ in 3"></td>
-        </tr>
-        <tr h-10></tr>
-        <tr h-10>
-          <td rowspan="1">
-            <span text-lg font-bold>Σ</span>
-          </td>
-          <td>{{ prettifyDms(zhuanZheJiaoSum) }}</td>
-          <td>
-            {{ prettifyDms(360 - zhuanZheJiaoSum) }}
-          </td>
-          <td>{{ prettifyDms(360) }}</td>
-          <td></td>
-          <td>{{ distanceSum.toFixed(4) }}</td>
-          <td>{{ zuoBiaoZengLiangSum.x.toFixed(4) }}</td>
-          <td>{{ zuoBiaoZengLiangSum.y.toFixed(4) }}</td>
-        </tr>
-        <tr h-10 colspan="13">
-          fD =
-          {{
-            Math.sqrt(
-              Math.pow(zuoBiaoZengLiangSum.x, 2) +
-                Math.pow(zuoBiaoZengLiangSum.y, 2)
-            ) / distanceSum
-          }}
-        </tr>
-      </tbody>
-    </NTable>
-  </v-card>
+        </tbody>
+      </q-markup-table>
+    </div>
+  </q-card>
 </template>
 
 <style scoped></style>
