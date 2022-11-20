@@ -76,8 +76,8 @@ const directionAngle = computed(() => {
 
 const zuoBiaoZengLiang = computed(() => {
   return distance.value.map((val, index) => ({
-    x: val * Math.sin((directionAngle.value[index] * Math.PI) / 180),
-    y: val * Math.cos((directionAngle.value[index] * Math.PI) / 180),
+    x: val * Math.cos((directionAngle.value[index] * Math.PI) / 180),
+    y: val * Math.sin((directionAngle.value[index] * Math.PI) / 180),
   }))
 })
 
