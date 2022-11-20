@@ -255,8 +255,8 @@ onMounted(() => {
                 </td>
               </template>
               <template v-else>
-                <td rowspan="2">{{ zuoBiao[index].x.toFixed(4) }}</td>
-                <td rowspan="2">{{ zuoBiao[index].y.toFixed(4) }}</td>
+                <td rowspan="2">{{ zuoBiao[index].x.toFixed(5) }}</td>
+                <td rowspan="2">{{ zuoBiao[index].y.toFixed(5) }}</td>
               </template>
               <td rowspan="2">
                 <q-btn
@@ -325,13 +325,13 @@ onMounted(() => {
                   "
                 ></q-input>
               </td>
-              <td rowspan="2">{{ zuoBiaoZengLiang[index].x.toFixed(4) }}</td>
-              <td rowspan="2">{{ zuoBiaoZengLiang[index].y.toFixed(4) }}</td>
+              <td rowspan="2">{{ zuoBiaoZengLiang[index].x.toFixed(5) }}</td>
+              <td rowspan="2">{{ zuoBiaoZengLiang[index].y.toFixed(5) }}</td>
               <td rowspan="2">
-                {{ gaiZhengHouZuoBiaoZengLiang[index].x.toFixed(4) }}
+                {{ gaiZhengHouZuoBiaoZengLiang[index].x.toFixed(5) }}
               </td>
               <td rowspan="2">
-                {{ gaiZhengHouZuoBiaoZengLiang[index].y.toFixed(4) }}
+                {{ gaiZhengHouZuoBiaoZengLiang[index].y.toFixed(5) }}
               </td>
             </tr>
           </template>
@@ -353,9 +353,9 @@ onMounted(() => {
             </td>
             <td>{{ prettifyDms(360) }}</td>
             <td></td>
-            <td>{{ distanceSum.toFixed(4) }}</td>
-            <td>{{ zuoBiaoZengLiangSum.x.toFixed(4) }}</td>
-            <td>{{ zuoBiaoZengLiangSum.y.toFixed(4) }}</td>
+            <td>{{ distanceSum.toFixed(5) }}</td>
+            <td>{{ zuoBiaoZengLiangSum.x.toFixed(5) }}</td>
+            <td>{{ zuoBiaoZengLiangSum.y.toFixed(5) }}</td>
           </tr>
           <tr h-10>
             <td colspan="13">
