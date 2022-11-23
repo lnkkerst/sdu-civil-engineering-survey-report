@@ -126,6 +126,7 @@ function handleAdd() {
     },
   })
   distance.value.push(Math.random() * 10)
+  nextTick(clearTableHover)
 }
 
 function handleDelete(index: number) {
@@ -133,13 +134,17 @@ function handleDelete(index: number) {
   distance.value.splice(index, 1)
 }
 
-onMounted(() => {
+function clearTableHover() {
   table.value.querySelectorAll('tr').forEach((el: HTMLTableRowElement) => {
     el.classList.add('q-tr--no-hover')
   })
   table.value.querySelectorAll('td').forEach((el: HTMLElement) => {
     el.classList.add('q-td--no-hover')
   })
+}
+
+onMounted(() => {
+  clearTableHover()
 })
 </script>
 
